@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title or "Funcionarios" }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .page-shell {
+            margin: 0 auto;
+            max-width: 1100px;
+            padding: 32px 24px 48px;
+            width: 100%;
+        }
+
+        .page-header {
+            align-items: center;
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            color: var(--muted-color);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .user-badge {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+        }
+
+        .grid {
+            display: grid;
+            gap: 24px;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        }
+
+        .panel {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+            padding: 24px;
+        }
+
+        .panel h2 {
+            margin-bottom: 16px;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 14px;
+        }
+
+        .form-grid label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .form-grid input,
+        .form-grid select {
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1rem;
+            padding: 12px 14px;
+            width: 100%;
+        }
+
+        .form-grid button {
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 10px;
+            color: #ffffff;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 12px 16px;
+        }
+
+        .status-badge {
+            border-radius: 999px;
+            display: inline-block;
+            font-size: 0.82rem;
+            font-weight: 700;
+            padding: 6px 10px;
+            text-transform: uppercase;
+        }
+
+        .status-ativo {
+            background-color: #e6fffa;
+            color: #0f766e;
+        }
+
+        .status-inativo {
+            background-color: #fff1f2;
+            color: #be123c;
+        }
+
+        .action-form {
+            margin: 0;
+        }
+
+        .action-button {
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 10px;
+            color: #ffffff;
+            cursor: pointer;
+            font-size: 0.92rem;
+            font-weight: 600;
+            padding: 10px 14px;
+        }
+
+        .activate-button {
+            background-color: #0f766e;
+        }
+
+        .inactivate-button {
+            background-color: #be123c;
+        }
+
+        .action-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .edit-link {
+            align-items: center;
+            background-color: #1f2937;
+            border-radius: 10px;
+            color: #ffffff;
+            display: inline-flex;
+            font-size: 0.92rem;
+            font-weight: 600;
+            padding: 10px 14px;
+            text-decoration: none;
+        }
+
+        .message {
+            border-radius: 10px;
+            margin-bottom: 16px;
+            padding: 12px 14px;
+        }
+
+        .message.error {
+            background-color: #fde8e8;
+            color: #9b1c1c;
+        }
+
+        .message.success {
+            background-color: #e6fffa;
+            color: #0f766e;
+        }
+
+        .nav-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .nav-link,
+        .cancel-link,
+        .logout-link {
+            align-items: center;
+            border-radius: 10px;
+            color: #ffffff;
+            display: inline-flex;
+            font-size: 0.95rem;
+            font-weight: 600;
+            justify-content: center;
+            padding: 12px 16px;
+            text-decoration: none;
+        }
+
+        .nav-link {
+            background-color: #1f2937;
+        }
+
+        .cancel-link {
+            background-color: #374151;
+        }
+
+        .logout-link {
+            background-color: #991b1b;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th,
+        td {
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 10px;
+            text-align: left;
+        }
+
+        th {
+            color: var(--muted-color);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .empty-state {
+            color: var(--muted-color);
+            padding: 12px 0 4px;
+        }
+
+        .password-hint {
+            color: var(--muted-color);
+            font-size: 0.88rem;
+            line-height: 1.5;
+            margin-top: -6px;
+        }
+
+        .login-hint {
+            color: var(--muted-color);
+            font-size: 0.88rem;
+            line-height: 1.5;
+            margin-top: -6px;
+        }
+    </style>
+</head>
+<body>
+    <main class="page-shell">
+        <header class="page-header">
+            <div>
+                <span class="tag">Somente Admin</span>
+                <h1>Cadastro de Funcionarios</h1>
+                <p>Cadastro inicial de funcionarios sem regras de ponto.</p>
+            </div>
+
+            <div class="user-badge">
+                <strong>Usuario:</strong> {{ current_user.display_name }}<br>
+                <strong>Perfil:</strong> {{ current_user.role }}
+            </div>
+        </header>
+
+        <section class="grid">
+            <article class="panel">
+                <h2>
+                    {% if funcionario_em_edicao %}
+                    Editar Funcionario
+                    {% else %}
+                    Novo Funcionario
+                    {% endif %}
+                </h2>
+
+                {% if error_message %}
+                <div class="message error">{{ error_message }}</div>
+                {% endif %}
+
+                {% if success_message %}
+                <div class="message success">{{ success_message }}</div>
+                {% endif %}
+
+                <div class="nav-actions">
+                    <a class="nav-link" href="{{ admin_url }}">Voltar para Admin</a>
+                    {% if funcionario_em_edicao %}
+                    <a class="cancel-link" href="{{ funcionarios_url }}">Cancelar edicao</a>
+                    {% endif %}
+                    <a class="logout-link" href="{{ logout_url }}">Sair</a>
+                </div>
+
+                <form method="post" action="{{ funcionarios_url }}" class="form-grid">
+                    <input
+                        type="hidden"
+                        name="form_action"
+                        value="{% if funcionario_em_edicao %}update{% else %}create{% endif %}"
+                    >
+
+                    {% if funcionario_em_edicao %}
+                    <input type="hidden" name="matricula_original" value="{{ funcionario_em_edicao.matricula }}">
+                    {% endif %}
+
+                    <div>
+                        <label for="nome">Nome</label>
+                        <input
+                            id="nome"
+                            name="nome"
+                            type="text"
+                            value="{{ funcionario_em_edicao.nome if funcionario_em_edicao else '' }}"
+                            required
+                        >
+                    </div>
+
+                    <div>
+                        <label for="matricula">Matricula</label>
+                        <input
+                            id="matricula"
+                            name="matricula"
+                            type="text"
+                            value="{{ funcionario_em_edicao.matricula if funcionario_em_edicao else '' }}"
+                            required
+                        >
+                        <p class="login-hint">
+                            A matricula e o identificador de login do funcionario.
+                        </p>
+                    </div>
+
+                    <div>
+                        <label for="cargo">Cargo</label>
+                        <input
+                            id="cargo"
+                            name="cargo"
+                            type="text"
+                            value="{{ funcionario_em_edicao.cargo if funcionario_em_edicao else '' }}"
+                            required
+                        >
+                    </div>
+
+                    <div>
+                        <label for="status">Status</label>
+                        <select id="status" name="status" required>
+                            <option value="">Selecione</option>
+                            <option value="ativo" {% if funcionario_em_edicao and funcionario_em_edicao.status == "ativo" %}selected{% endif %}>Ativo</option>
+                            <option value="inativo" {% if funcionario_em_edicao and funcionario_em_edicao.status == "inativo" %}selected{% endif %}>Inativo</option>
+                        </select>
+                    </div>
+
+                    {% if funcionario_em_edicao %}
+                    <div>
+                        <label for="nova_senha_provisoria">Redefinir senha</label>
+                        <input
+                            id="nova_senha_provisoria"
+                            name="nova_senha_provisoria"
+                            type="password"
+                            placeholder="Informe uma nova senha provisoria"
+                        >
+                        <p class="password-hint">
+                            Se preencher este campo, o funcionario sera obrigado a trocar a senha no proximo login.
+                        </p>
+                    </div>
+                    {% endif %}
+
+                    {% if not funcionario_em_edicao %}
+                    <p class="password-hint">
+                        Novos funcionarios recebem senha provisoria 123456 e trocam a senha no primeiro login.
+                    </p>
+                    {% endif %}
+
+                    <button type="submit">
+                        {% if funcionario_em_edicao %}
+                        Salvar Alteracoes
+                        {% else %}
+                        Cadastrar
+                        {% endif %}
+                    </button>
+                </form>
+            </article>
+
+            <article class="panel">
+                <h2>Funcionarios Cadastrados</h2>
+
+                {% if funcionarios %}
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Matricula</th>
+                                <th>Cargo</th>
+                                <th>Status</th>
+                                <th>Acoes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for funcionario in funcionarios %}
+                            <tr>
+                                <td>{{ funcionario.nome }}</td>
+                                <td>{{ funcionario.matricula }}</td>
+                                <td>{{ funcionario.cargo }}</td>
+                                <td>
+                                    <span class="status-badge status-{{ funcionario.status }}">
+                                        {{ funcionario.status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-stack">
+                                        <a class="edit-link" href="{{ url_for('funcionarios.index', edit=funcionario.matricula) }}">
+                                            Editar
+                                        </a>
+                                        <form method="post" action="{{ funcionarios_url }}" class="action-form">
+                                            <input type="hidden" name="form_action" value="set_status">
+                                            <input type="hidden" name="matricula" value="{{ funcionario.matricula }}">
+                                            <input
+                                                type="hidden"
+                                                name="status"
+                                                value="{% if funcionario.status == 'ativo' %}inativo{% else %}ativo{% endif %}"
+                                            >
+                                            <button
+                                                type="submit"
+                                                class="action-button {% if funcionario.status == 'ativo' %}inactivate-button{% else %}activate-button{% endif %}"
+                                            >
+                                                {% if funcionario.status == "ativo" %}
+                                                Inativar
+                                                {% else %}
+                                                Ativar
+                                                {% endif %}
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="empty-state">Nenhum funcionario cadastrado ate o momento.</p>
+                {% endif %}
+            </article>
+        </section>
+    </main>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title or "Bater Ponto" }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .page-shell {
+            margin: 0 auto;
+            max-width: 1100px;
+            padding: 32px 24px 48px;
+            width: 100%;
+        }
+
+        .page-header {
+            align-items: center;
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            color: var(--muted-color);
+        }
+
+        .user-badge {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+        }
+
+        .grid {
+            display: grid;
+            gap: 24px;
+            grid-template-columns: minmax(320px, 380px) minmax(0, 1fr);
+        }
+
+        .panel {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+            padding: 24px;
+        }
+
+        .panel h2 {
+            margin-bottom: 16px;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 14px;
+        }
+
+        .form-grid label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .form-grid select,
+        .form-grid button {
+            border-radius: 10px;
+            font-size: 1rem;
+            padding: 12px 14px;
+            width: 100%;
+        }
+
+        .form-grid select {
+            border: 1px solid var(--border-color);
+        }
+
+        .form-grid button {
+            background-color: var(--primary-color);
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .message {
+            border-radius: 10px;
+            margin-bottom: 16px;
+            padding: 12px 14px;
+        }
+
+        .message.error {
+            background-color: #fde8e8;
+            color: #9b1c1c;
+        }
+
+        .message.success {
+            background-color: #e6fffa;
+            color: #0f766e;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th,
+        td {
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 10px;
+            text-align: left;
+        }
+
+        th {
+            color: var(--muted-color);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .empty-state {
+            color: var(--muted-color);
+            padding-top: 8px;
+        }
+
+        @media (max-width: 900px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="page-shell">
+        <header class="page-header">
+            <div>
+                <span class="tag">Registro de Jornada</span>
+                <h1>Bater Ponto</h1>
+                <p>Selecione um funcionario ativo para registrar data e hora do ponto.</p>
+            </div>
+
+            <div class="user-badge">
+                <strong>Usuario:</strong> {{ current_user.display_name }}<br>
+                <strong>Perfil:</strong> {{ current_user.role }}
+            </div>
+        </header>
+
+        <section class="grid">
+            <article class="panel">
+                <h2>Novo Registro</h2>
+
+                {% if error_message %}
+                <div class="message error">{{ error_message }}</div>
+                {% endif %}
+
+                {% if success_message %}
+                <div class="message success">{{ success_message }}</div>
+                {% endif %}
+
+                <form method="post" class="form-grid">
+                    <div>
+                        <label for="matricula">Funcionario</label>
+                        <select id="matricula" name="matricula" required>
+                            <option value="">Selecione um funcionario ativo</option>
+                            {% for funcionario in funcionarios_ativos %}
+                            <option value="{{ funcionario.matricula }}">
+                                {{ funcionario.nome }} | {{ funcionario.matricula }} | {{ funcionario.cargo }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <button type="submit">Bater ponto</button>
+                </form>
+            </article>
+
+            <article class="panel">
+                <h2>Pontos Registrados</h2>
+
+                {% if registros %}
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Funcionario</th>
+                                <th>Matricula</th>
+                                <th>Cargo</th>
+                                <th>Data</th>
+                                <th>Hora</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for registro in registros %}
+                            <tr>
+                                <td>{{ registro.funcionario }}</td>
+                                <td>{{ registro.matricula if registro.matricula is defined else "-" }}</td>
+                                <td>{{ registro.cargo if registro.cargo is defined else "-" }}</td>
+                                <td>{{ registro.data }}</td>
+                                <td>{{ registro.hora }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="empty-state">Nenhum ponto registrado ate o momento.</p>
+                {% endif %}
+            </article>
+        </section>
+    </main>
+</body>
+</html>

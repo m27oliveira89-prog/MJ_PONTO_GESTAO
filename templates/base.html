@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title or "MJ Ponto Gestao" }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="app-shell">
+        <div class="bg-orb orb-left"></div>
+        <div class="bg-orb orb-right"></div>
+
+        <main class="page-wrap">
+            {% block page %}
+            <section class="glass-card hero-card">
+                <div class="brand-lockup">
+                    <span class="brand-chip">MJ PONTO GESTAO</span>
+                    <span class="brand-line"></span>
+                </div>
+
+                <div class="hero-copy">
+                    <p class="eyebrow">Sistema Corporativo</p>
+                    <h1>Controle de ponto com visual moderno e profissional.</h1>
+                    <p class="lead">
+                        Estrutura inicial do sistema pronta para evolucao, mantendo um
+                        visual premium, escuro e consistente.
+                    </p>
+                </div>
+            </section>
+            {% endblock %}
+        </main>
+    </div>
+</body>
+</html>

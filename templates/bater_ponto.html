@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title or "Bater Ponto" }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script defer src="{{ url_for('static', filename='js/gps.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='js/camera.js') }}"></script>
+    <style>
+        .page-shell {
+            margin: 0 auto;
+            max-width: 980px;
+            padding: 32px 24px 48px;
+            width: 100%;
+        }
+
+        .page-header {
+            align-items: center;
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            color: var(--muted-color);
+        }
+
+        .user-badge {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+        }
+
+        .grid {
+            display: grid;
+            gap: 24px;
+            grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+        }
+
+        .panel {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+            padding: 24px;
+        }
+
+        .panel h2 {
+            margin-bottom: 16px;
+        }
+
+        .message {
+            border-radius: 10px;
+            margin-bottom: 16px;
+            padding: 12px 14px;
+        }
+
+        .message.error {
+            background-color: #fde8e8;
+            color: #9b1c1c;
+        }
+
+        .message.success {
+            background-color: #e6fffa;
+            color: #0f766e;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 14px;
+        }
+
+        .form-grid label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .form-grid select,
+        .form-grid button {
+            border-radius: 10px;
+            font-size: 1rem;
+            padding: 12px 14px;
+            width: 100%;
+        }
+
+        .form-grid select {
+            border: 1px solid var(--border-color);
+        }
+
+        .form-grid button {
+            background-color: var(--primary-color);
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        .status-text {
+            color: var(--muted-color);
+            font-size: 0.92rem;
+        }
+
+        .camera-preview {
+            background-color: #d9e2ec;
+            border-radius: 12px;
+            width: 100%;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th,
+        td {
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 10px;
+            text-align: left;
+        }
+
+        th {
+            color: var(--muted-color);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .empty-state {
+            color: var(--muted-color);
+            padding-top: 8px;
+        }
+
+        @media (max-width: 860px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="page-shell">
+        <header class="page-header">
+            <div>
+                <span class="tag">Registro de Jornada</span>
+                <h1>Bater Ponto</h1>
+                <p>Registro de ponto com suporte a GPS e foto quando disponiveis.</p>
+            </div>
+
+            <div class="user-badge">
+                <strong>Funcionario:</strong> {{ current_user.display_name }}<br>
+                <strong>Perfil:</strong> {{ current_user.role }}
+            </div>
+        </header>
+
+        <section class="grid">
+            <article class="panel">
+                <h2>Novo Registro</h2>
+
+                {% if error_message %}
+                <div class="message error">{{ error_message }}</div>
+                {% endif %}
+
+                {% if success_message %}
+                <div class="message success">{{ success_message }}</div>
+                {% endif %}
+
+                <form method="post" class="form-grid">
+                    <div>
+                        <label for="tipo">Tipo de registro</label>
+                        <select id="tipo" name="tipo" required>
+                            <option value="">Selecione</option>
+                            <option value="entrada">Entrada</option>
+                            <option value="almoco_saida">Almoco Saida</option>
+                            <option value="retorno">Retorno</option>
+                            <option value="saida_final">Saida Final</option>
+                        </select>
+                    </div>
+
+                    <input type="hidden" name="latitude">
+                    <input type="hidden" name="longitude">
+                    <input type="hidden" name="foto_url">
+
+                    <div>
+                        <label>Status do GPS</label>
+                        <p class="status-text" data-gps-status>Aguardando permissao de localizacao.</p>
+                    </div>
+
+                    <div>
+                        <label>Captura de foto</label>
+                        <video class="camera-preview" data-camera-preview autoplay playsinline muted></video>
+                        <canvas data-camera-canvas hidden></canvas>
+                        <button type="button" data-camera-capture>Capturar Foto</button>
+                        <p class="status-text" data-camera-status>Foto opcional.</p>
+                    </div>
+
+                    <button type="submit">Registrar Ponto</button>
+                </form>
+            </article>
+
+            <article class="panel">
+                <h2>Historico do Funcionario</h2>
+
+                {% if registros %}
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Hora</th>
+                                <th>Tipo</th>
+                                <th>Funcionario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for registro in registros %}
+                            <tr>
+                                <td>{{ registro.data }}</td>
+                                <td>{{ registro.hora }}</td>
+                                <td>{{ registro.tipo_label }}</td>
+                                <td>{{ registro.funcionario }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="empty-state">Nenhum registro de ponto encontrado.</p>
+                {% endif %}
+            </article>
+        </section>
+    </main>
+</body>
+</html>

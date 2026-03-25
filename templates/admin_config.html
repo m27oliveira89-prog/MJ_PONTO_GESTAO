@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title or "Configuracoes Admin" }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .page-shell {
+            margin: 0 auto;
+            max-width: 900px;
+            padding: 32px 24px 48px;
+            width: 100%;
+        }
+
+        .page-header {
+            align-items: center;
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            color: var(--muted-color);
+        }
+
+        .user-badge {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+        }
+
+        .panel {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+            padding: 24px;
+        }
+
+        .panel h2 {
+            margin-bottom: 16px;
+        }
+
+        .message {
+            border-radius: 10px;
+            margin-bottom: 16px;
+            padding: 12px 14px;
+        }
+
+        .message.error {
+            background-color: #fde8e8;
+            color: #9b1c1c;
+        }
+
+        .message.success {
+            background-color: #e6fffa;
+            color: #0f766e;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 18px;
+        }
+
+        .checkbox-row {
+            align-items: center;
+            display: flex;
+            gap: 12px;
+        }
+
+        .checkbox-row input[type="checkbox"] {
+            height: 18px;
+            width: 18px;
+        }
+
+        .field label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .field input[type="number"] {
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1rem;
+            padding: 12px 14px;
+            width: 100%;
+        }
+
+        .submit-button {
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 10px;
+            color: #ffffff;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 12px 16px;
+        }
+
+        .summary {
+            border-top: 1px solid var(--border-color);
+            margin-top: 24px;
+            padding-top: 20px;
+        }
+
+        .summary ul {
+            color: var(--muted-color);
+            display: grid;
+            gap: 8px;
+            list-style: none;
+            padding-left: 0;
+        }
+    </style>
+</head>
+<body>
+    <main class="page-shell">
+        <header class="page-header">
+            <div>
+                <span class="tag">Somente Admin</span>
+                <h1>Configuracoes do Sistema</h1>
+                <p>Controle basico das regras administrativas do ponto.</p>
+            </div>
+
+            <div class="user-badge">
+                <strong>Usuario:</strong> {{ current_user.display_name }}<br>
+                <strong>Perfil:</strong> {{ current_user.role }}
+            </div>
+        </header>
+
+        <section class="panel">
+            <h2>Preferencias</h2>
+
+            {% if error_message %}
+            <div class="message error">{{ error_message }}</div>
+            {% endif %}
+
+            {% if success_message %}
+            <div class="message success">{{ success_message }}</div>
+            {% endif %}
+
+            <form method="post" class="form-grid">
+                <label class="checkbox-row" for="usar_gps">
+                    <input
+                        id="usar_gps"
+                        name="usar_gps"
+                        type="checkbox"
+                        {% if config.usar_gps %}checked{% endif %}
+                    >
+                    <span>Usar GPS</span>
+                </label>
+
+                <label class="checkbox-row" for="bloquear_localizacao">
+                    <input
+                        id="bloquear_localizacao"
+                        name="bloquear_localizacao"
+                        type="checkbox"
+                        {% if config.bloquear_localizacao %}checked{% endif %}
+                    >
+                    <span>Bloquear por localizacao</span>
+                </label>
+
+                <label class="checkbox-row" for="exigir_foto">
+                    <input
+                        id="exigir_foto"
+                        name="exigir_foto"
+                        type="checkbox"
+                        {% if config.exigir_foto %}checked{% endif %}
+                    >
+                    <span>Exigir foto</span>
+                </label>
+
+                <div class="field">
+                    <label for="raio">Raio permitido</label>
+                    <input
+                        id="raio"
+                        name="raio"
+                        type="number"
+                        min="0"
+                        value="{{ config.raio }}"
+                        required
+                    >
+                </div>
+
+                <div class="field">
+                    <label for="dias_retencao">Dias de retencao</label>
+                    <input
+                        id="dias_retencao"
+                        name="dias_retencao"
+                        type="number"
+                        min="0"
+                        value="{{ config.dias_retencao }}"
+                        required
+                    >
+                </div>
+
+                <div class="field">
+                    <label for="latitude_referencia">Latitude de referencia</label>
+                    <input
+                        id="latitude_referencia"
+                        name="latitude_referencia"
+                        type="number"
+                        step="any"
+                        value="{{ config.latitude_referencia if config.latitude_referencia is not none else '' }}"
+                    >
+                </div>
+
+                <div class="field">
+                    <label for="longitude_referencia">Longitude de referencia</label>
+                    <input
+                        id="longitude_referencia"
+                        name="longitude_referencia"
+                        type="number"
+                        step="any"
+                        value="{{ config.longitude_referencia if config.longitude_referencia is not none else '' }}"
+                    >
+                </div>
+
+                <button type="submit" class="submit-button">Salvar configuracoes</button>
+            </form>
+
+            <div class="summary">
+                <h2>Resumo Atual</h2>
+                <ul>
+                    <li>Usar GPS: {{ "Sim" if config.usar_gps else "Nao" }}</li>
+                    <li>Bloquear localizacao: {{ "Sim" if config.bloquear_localizacao else "Nao" }}</li>
+                    <li>Exigir foto: {{ "Sim" if config.exigir_foto else "Nao" }}</li>
+                    <li>Raio: {{ config.raio }}</li>
+                    <li>Dias de retencao: {{ config.dias_retencao }}</li>
+                    <li>Latitude referencia: {{ config.latitude_referencia if config.latitude_referencia is not none else "-" }}</li>
+                    <li>Longitude referencia: {{ config.longitude_referencia if config.longitude_referencia is not none else "-" }}</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

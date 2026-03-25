@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title or "Historico de Ponto" }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .page-shell {
+            margin: 0 auto;
+            max-width: 1100px;
+            padding: 32px 24px 48px;
+            width: 100%;
+        }
+
+        .page-header {
+            align-items: center;
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            color: var(--muted-color);
+        }
+
+        .user-badge {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+        }
+
+        .layout {
+            display: grid;
+            gap: 24px;
+            grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+        }
+
+        .panel {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+            padding: 24px;
+        }
+
+        .panel h2 {
+            margin-bottom: 16px;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 14px;
+        }
+
+        .form-grid label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .form-grid input,
+        .form-grid select,
+        .form-grid button {
+            border-radius: 10px;
+            font-size: 1rem;
+            padding: 12px 14px;
+            width: 100%;
+        }
+
+        .form-grid input,
+        .form-grid select {
+            border: 1px solid var(--border-color);
+        }
+
+        .form-grid button {
+            background-color: var(--primary-color);
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th,
+        td {
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 10px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            color: var(--muted-color);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .empty-state {
+            color: var(--muted-color);
+            padding-top: 8px;
+        }
+
+        .hint {
+            color: var(--muted-color);
+            font-size: 0.92rem;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 900px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="page-shell">
+        <header class="page-header">
+            <div>
+                <span class="tag">Consulta de Registros</span>
+                <h1>Historico de Ponto</h1>
+                <p>Listagem e filtro dos registros de ponto do sistema.</p>
+            </div>
+
+            <div class="user-badge">
+                <strong>Usuario:</strong> {{ current_user.display_name }}<br>
+                <strong>Perfil:</strong> {{ current_user.role }}
+            </div>
+        </header>
+
+        <section class="layout">
+            <article class="panel">
+                <h2>Filtros</h2>
+
+                <form method="get" class="form-grid">
+                    {% if is_admin %}
+                    <div>
+                        <label for="funcionario">Funcionario</label>
+                        <input
+                            id="funcionario"
+                            name="funcionario"
+                            type="text"
+                            value="{{ filters.funcionario }}"
+                            placeholder="Nome do funcionario"
+                        >
+                    </div>
+                    {% endif %}
+
+                    <div>
+                        <label for="data">Data</label>
+                        <input
+                            id="data"
+                            name="data"
+                            type="date"
+                            value="{{ filters.data }}"
+                        >
+                    </div>
+
+                    <div>
+                        <label for="tipo">Tipo</label>
+                        <select id="tipo" name="tipo">
+                            <option value="">Todos</option>
+                            <option value="entrada" {% if filters.tipo == "entrada" %}selected{% endif %}>Entrada</option>
+                            <option value="almoco_saida" {% if filters.tipo == "almoco_saida" %}selected{% endif %}>Almoco Saida</option>
+                            <option value="retorno" {% if filters.tipo == "retorno" %}selected{% endif %}>Retorno</option>
+                            <option value="saida_final" {% if filters.tipo == "saida_final" %}selected{% endif %}>Saida Final</option>
+                        </select>
+                    </div>
+
+                    <button type="submit">Filtrar</button>
+                </form>
+
+                <p class="hint">
+                    {% if is_admin %}
+                    O perfil admin pode consultar todos os funcionarios.
+                    {% else %}
+                    O perfil funcionario visualiza apenas os proprios registros.
+                    {% endif %}
+                </p>
+            </article>
+
+            <article class="panel">
+                <h2>Registros</h2>
+
+                {% if registros %}
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Hora</th>
+                                <th>Tipo</th>
+                                <th>Funcionario</th>
+                                <th>Latitude</th>
+                                <th>Longitude</th>
+                                <th>Foto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for registro in registros %}
+                            <tr>
+                                <td>{{ registro.data }}</td>
+                                <td>{{ registro.hora }}</td>
+                                <td>{{ registro.tipo_label }}</td>
+                                <td>{{ registro.funcionario }}</td>
+                                <td>{{ registro.latitude if registro.latitude is not none else "-" }}</td>
+                                <td>{{ registro.longitude if registro.longitude is not none else "-" }}</td>
+                                <td>{{ "Sim" if registro.foto_url else "Nao" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="empty-state">Nenhum registro encontrado para os filtros informados.</p>
+                {% endif %}
+            </article>
+        </section>
+    </main>
+</body>
+</html>

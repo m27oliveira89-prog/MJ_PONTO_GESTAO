@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title or "Relatorios" }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .page-shell {
+            margin: 0 auto;
+            max-width: 1200px;
+            padding: 32px 24px 48px;
+            width: 100%;
+        }
+
+        .page-header {
+            align-items: center;
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            color: var(--muted-color);
+        }
+
+        .user-badge {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+        }
+
+        .layout {
+            display: grid;
+            gap: 24px;
+        }
+
+        .filters-panel,
+        .panel,
+        .stat-card {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+        }
+
+        .filters-panel,
+        .panel {
+            padding: 24px;
+        }
+
+        .filters-grid,
+        .stats-grid,
+        .summary-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .filters-grid {
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        }
+
+        .summary-grid {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+
+        .filters-panel label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .filters-panel input,
+        .filters-panel button {
+            border-radius: 10px;
+            font-size: 1rem;
+            padding: 12px 14px;
+            width: 100%;
+        }
+
+        .filters-panel input {
+            border: 1px solid var(--border-color);
+        }
+
+        .filters-panel button {
+            background-color: var(--primary-color);
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 29px;
+        }
+
+        .stat-card {
+            padding: 20px;
+        }
+
+        .stat-card h3 {
+            color: var(--muted-color);
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+        }
+
+        .stat-card strong {
+            font-size: 2rem;
+        }
+
+        .summary-list {
+            display: grid;
+            gap: 10px;
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .summary-list li {
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            padding-bottom: 10px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th,
+        td {
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 10px;
+            text-align: left;
+        }
+
+        th {
+            color: var(--muted-color);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .empty-state {
+            color: var(--muted-color);
+            padding-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <main class="page-shell">
+        <header class="page-header">
+            <div>
+                <span class="tag">Somente Admin</span>
+                <h1>Relatorios</h1>
+                <p>Visao consolidada dos registros de ponto por periodo e funcionario.</p>
+            </div>
+
+            <div class="user-badge">
+                <strong>Usuario:</strong> {{ current_user.display_name }}<br>
+                <strong>Perfil:</strong> {{ current_user.role }}
+            </div>
+        </header>
+
+        <section class="layout">
+            <form method="get" class="filters-panel filters-grid">
+                <div>
+                    <label for="funcionario">Funcionario</label>
+                    <input
+                        id="funcionario"
+                        name="funcionario"
+                        type="text"
+                        value="{{ filters.funcionario }}"
+                        placeholder="Nome exato do funcionario"
+                    >
+                </div>
+
+                <div>
+                    <label for="data_inicial">Data inicial</label>
+                    <input
+                        id="data_inicial"
+                        name="data_inicial"
+                        type="date"
+                        value="{{ filters.data_inicial }}"
+                    >
+                </div>
+
+                <div>
+                    <label for="data_final">Data final</label>
+                    <input
+                        id="data_final"
+                        name="data_final"
+                        type="date"
+                        value="{{ filters.data_final }}"
+                    >
+                </div>
+
+                <div>
+                    <button type="submit">Gerar relatorio</button>
+                </div>
+            </form>
+
+            <section class="stats-grid">
+                <article class="stat-card">
+                    <h3>Total de registros</h3>
+                    <strong>{{ relatorio.total_registros }}</strong>
+                </article>
+
+                <article class="stat-card">
+                    <h3>Entradas</h3>
+                    <strong>{{ relatorio.totais_por_tipo.entrada }}</strong>
+                </article>
+
+                <article class="stat-card">
+                    <h3>Almoco Saida</h3>
+                    <strong>{{ relatorio.totais_por_tipo.almoco_saida }}</strong>
+                </article>
+
+                <article class="stat-card">
+                    <h3>Retornos</h3>
+                    <strong>{{ relatorio.totais_por_tipo.retorno }}</strong>
+                </article>
+
+                <article class="stat-card">
+                    <h3>Saidas Finais</h3>
+                    <strong>{{ relatorio.totais_por_tipo.saida_final }}</strong>
+                </article>
+            </section>
+
+            <section class="summary-grid">
+                <article class="panel">
+                    <h2>Totais por Funcionario</h2>
+
+                    {% if relatorio.totais_por_funcionario %}
+                    <ul class="summary-list">
+                        {% for funcionario, total in relatorio.totais_por_funcionario.items() %}
+                        <li>
+                            <span>{{ funcionario }}</span>
+                            <strong>{{ total }}</strong>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="empty-state">Nenhum dado encontrado para os filtros selecionados.</p>
+                    {% endif %}
+                </article>
+
+                <article class="panel">
+                    <h2>Totais por Tipo</h2>
+                    <ul class="summary-list">
+                        <li><span>Entrada</span><strong>{{ relatorio.totais_por_tipo.entrada }}</strong></li>
+                        <li><span>Almoco Saida</span><strong>{{ relatorio.totais_por_tipo.almoco_saida }}</strong></li>
+                        <li><span>Retorno</span><strong>{{ relatorio.totais_por_tipo.retorno }}</strong></li>
+                        <li><span>Saida Final</span><strong>{{ relatorio.totais_por_tipo.saida_final }}</strong></li>
+                    </ul>
+                </article>
+            </section>
+
+            <section class="panel">
+                <h2>Detalhamento</h2>
+
+                {% if relatorio.registros %}
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Hora</th>
+                                <th>Tipo</th>
+                                <th>Funcionario</th>
+                                <th>Latitude</th>
+                                <th>Longitude</th>
+                                <th>Foto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for registro in relatorio.registros %}
+                            <tr>
+                                <td>{{ registro.data }}</td>
+                                <td>{{ registro.hora }}</td>
+                                <td>{{ registro.tipo_label }}</td>
+                                <td>{{ registro.funcionario }}</td>
+                                <td>{{ registro.latitude if registro.latitude is not none else "-" }}</td>
+                                <td>{{ registro.longitude if registro.longitude is not none else "-" }}</td>
+                                <td>{{ "Sim" if registro.foto_url else "Nao" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="empty-state">Nenhum registro encontrado para montar o relatorio.</p>
+                {% endif %}
+            </section>
+        </section>
+    </main>
+</body>
+</html>

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block page %}
+<section class="simple-login-shell">
+    <article class="glass-card simple-auth-card">
+        <div class="simple-auth-header">
+            <span class="brand-chip">MJ PONTO GESTAO</span>
+            <p class="eyebrow">{% if access_mode == "admin" %}Acesso Administrativo{% else %}Entrada no Sistema{% endif %}</p>
+            <h1>{% if access_mode == "admin" %}Area Administrativa{% else %}Entrar{% endif %}</h1>
+            <p class="simple-subtitle">
+                {% if access_mode == "admin" %}
+                Informe suas credenciais para acessar os recursos administrativos.
+                {% else %}
+                Informe usuario e senha para entrar no sistema.
+                {% endif %}
+            </p>
+        </div>
+
+        <form method="post" class="auth-form">
+            <input type="hidden" name="access_mode" value="{{ access_mode }}">
+
+            <div class="field-group">
+                <label for="username">Usuario</label>
+                <input id="username" name="username" type="text" placeholder="Digite seu usuario" required>
+            </div>
+
+            <div class="field-group">
+                <label for="password">Senha</label>
+                <input id="password" name="password" type="password" placeholder="Digite sua senha" required>
+            </div>
+
+            {% if error_message %}
+            <div class="feedback feedback-error">{{ error_message }}</div>
+            {% endif %}
+
+            <button type="submit" class="primary-button">Entrar</button>
+        </form>
+
+        <div class="auth-actions">
+            {% if access_mode == "admin" %}
+            <a class="secondary-link" href="{{ url_for('auth.login') }}">Voltar ao acesso normal</a>
+            {% else %}
+            <a class="secondary-link" href="{{ url_for('auth.login', mode='admin') }}">Acesso Admin</a>
+            {% endif %}
+        </div>
+    </article>
+</section>
+{% endblock %}

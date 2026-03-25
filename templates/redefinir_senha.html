@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redefinir Senha | MJ Ponto Gestao</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .nav-button,
+        .secondary-nav-button {
+            align-items: center;
+            display: flex;
+            justify-content: center;
+            text-decoration: none;
+            width: 100%;
+        }
+
+        .secondary-nav-button {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(212, 175, 55, 0.18);
+            border-radius: 16px;
+            color: #f8fafc;
+            font-size: 1rem;
+            font-weight: 700;
+            padding: 15px 18px;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .secondary-nav-button:hover {
+            border-color: rgba(212, 175, 55, 0.42);
+            transform: translateY(-1px);
+        }
+
+        .success-feedback {
+            background: rgba(15, 118, 110, 0.18);
+            border-color: rgba(45, 212, 191, 0.24);
+            color: #ccfbf1;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        <div class="bg-orb orb-left"></div>
+        <div class="bg-orb orb-right"></div>
+        <main class="page-wrap">
+            <section class="simple-login-shell">
+                <article class="glass-card simple-auth-card">
+                    <div class="simple-auth-header">
+                        <span class="brand-chip">MJ PONTO GESTAO</span>
+                        <p class="eyebrow">Troca Obrigatoria</p>
+                        {% if flow_completed %}
+                        <h1>Senha atualizada</h1>
+                        <p class="simple-subtitle">
+                            {{ current_user.display_name }}, sua senha foi salva com sucesso.
+                        </p>
+                        {% else %}
+                        <h1>Definir nova senha</h1>
+                        <p class="simple-subtitle">
+                            {{ current_user.display_name }}, altere sua senha para continuar.
+                        </p>
+                        {% endif %}
+                    </div>
+
+                    {% if flow_completed %}
+                    <div class="auth-form">
+                        <div class="feedback success-feedback">{{ success_message }}</div>
+                        <a href="{{ url_for('home.index') }}" class="primary-button nav-button">
+                            Continuar para bater ponto
+                        </a>
+                        <a href="{{ url_for('auth.logout') }}" class="secondary-nav-button">
+                            Ir para login
+                        </a>
+                    </div>
+                    {% else %}
+                    <form method="post" class="auth-form">
+                        <div class="field-group">
+                            <label for="nova_senha">Nova senha</label>
+                            <input id="nova_senha" name="nova_senha" type="password" required>
+                        </div>
+
+                        {% if error_message %}
+                        <div class="feedback feedback-error">{{ error_message }}</div>
+                        {% endif %}
+
+                        <button type="submit" class="primary-button">Salvar nova senha</button>
+                    </form>
+                    {% endif %}
+                </article>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Area Admin | MJ Ponto Gestao</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .admin-topbar {
+            align-items: center;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .admin-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .admin-nav-link {
+            align-items: center;
+            border-radius: 14px;
+            display: inline-flex;
+            font-size: 0.95rem;
+            font-weight: 700;
+            justify-content: center;
+            min-height: 46px;
+            padding: 12px 16px;
+            text-decoration: none;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .admin-nav-link:hover {
+            opacity: 0.94;
+            transform: translateY(-1px);
+        }
+
+        .admin-nav-link.primary {
+            background: linear-gradient(135deg, #d4af37 0%, #f2d675 100%);
+            color: #0e1117;
+        }
+
+        .admin-nav-link.secondary {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        <div class="bg-orb orb-left"></div>
+        <div class="bg-orb orb-right"></div>
+        <main class="page-wrap">
+            <section class="glass-card admin-panel admin-shell">
+                <div class="admin-panel">
+                    <div class="admin-topbar">
+                        <span class="brand-chip">MJ PONTO GESTAO</span>
+
+                        <div class="admin-actions">
+                            <a class="admin-nav-link secondary" href="{{ url_for('funcionarios.index') }}">Funcionarios</a>
+                            <a class="admin-nav-link secondary" href="{{ url_for('admin.configuracoes') }}">Configuracoes</a>
+                            <a class="admin-nav-link primary" href="{{ url_for('auth.logout') }}">Sair</a>
+                        </div>
+                    </div>
+
+                    <header class="admin-header">
+                        <div>
+                            <p class="eyebrow">Area Administrativa</p>
+                            <h1>Painel de administracao</h1>
+                            <p>
+                                Acesso centralizado para configuracoes, funcionarios,
+                                historico, relatorios e exportacao.
+                            </p>
+                        </div>
+
+                        <div class="admin-user">
+                            <span>Administrador</span>
+                            <strong>{{ current_user.display_name }}</strong>
+                        </div>
+                    </header>
+
+                    <section class="admin-grid">
+                        <a class="admin-link-card" href="{{ url_for('funcionarios.index') }}">
+                            <span class="admin-tag">Funcionarios</span>
+                            <h2>Inserir funcionario</h2>
+                            <p>Abrir a pagina de funcionarios para cadastrar, editar e alterar status.</p>
+                        </a>
+
+                        <a class="admin-link-card" href="{{ url_for('funcionarios.index') }}">
+                            <span class="admin-tag">Funcionarios</span>
+                            <h2>Editar funcionario</h2>
+                            <p>Gerencie os dados cadastrais sem depender do historico do navegador.</p>
+                        </a>
+
+                        <a class="admin-link-card" href="{{ url_for('funcionarios.index') }}">
+                            <span class="admin-tag">Funcionarios</span>
+                            <h2>Ativar ou inativar funcionario</h2>
+                            <p>Controle o status dos colaboradores diretamente na listagem.</p>
+                        </a>
+
+                        <a class="admin-link-card" href="{{ url_for('admin.configuracoes') }}">
+                            <span class="admin-tag">Configuracoes</span>
+                            <h2>GPS e regras do ponto</h2>
+                            <p>Usar GPS, trava por localizacao, raio permitido e exigencia de foto.</p>
+                        </a>
+
+                        <a class="admin-link-card" href="{{ url_for('admin.configuracoes') }}">
+                            <span class="admin-tag">Retencao</span>
+                            <h2>Limpeza de fotos</h2>
+                            <p>Configuracao de retencao e suporte a limpeza de fotos antigas.</p>
+                        </a>
+
+                        <a class="admin-link-card" href="{{ url_for('historico.ponto') }}">
+                            <span class="admin-tag">Historico</span>
+                            <h2>Historico de ponto</h2>
+                            <p>Consulta dos registros com filtros por funcionario, data e tipo.</p>
+                        </a>
+
+                        <a class="admin-link-card" href="{{ url_for('relatorios.index') }}">
+                            <span class="admin-tag">Relatorios</span>
+                            <h2>Relatorios gerenciais</h2>
+                            <p>Visao consolidada dos registros por periodo e funcionario.</p>
+                        </a>
+
+                        <a class="admin-link-card" href="{{ url_for('exportacao.excel') }}">
+                            <span class="admin-tag">Exportacao</span>
+                            <h2>Exportar Excel</h2>
+                            <p>Gera arquivo de exportacao em formato compativel com Excel.</p>
+                        </a>
+
+                        <a class="admin-link-card" href="{{ url_for('exportacao.pdf') }}">
+                            <span class="admin-tag">Exportacao</span>
+                            <h2>Exportar PDF</h2>
+                            <p>Gera arquivo PDF com os registros consolidados do sistema.</p>
+                        </a>
+                    </section>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
