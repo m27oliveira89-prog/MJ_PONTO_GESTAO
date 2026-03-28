@@ -1,0 +1,50 @@
+[
+  {
+    "nome": "David Cerqueira",
+    "matricula": "MAT001",
+    "cargo": "Motorista",
+    "status": "ativo",
+    "senha": "123456",
+    "trocar_senha_no_primeiro_login": false
+  },
+  {
+    "nome": "Lucio M",
+    "matricula": "MAT002",
+    "cargo": "Auxiliar Administrativo",
+    "status": "ativo",
+    "senha": "123456",
+    "trocar_senha_no_primeiro_login": false
+  },
+  {
+    "nome": "Maik Oliveira",
+    "matricula": "MAT003",
+    "cargo": "Conferente",
+    "status": "ativo",
+    "senha": "123456",
+    "trocar_senha_no_primeiro_login": false
+  },
+  {
+    "nome": "Juliene Batista",
+    "matricula": "MAT004",
+    "cargo": "RH",
+    "status": "ativo",
+    "senha": "123456",
+    "trocar_senha_no_primeiro_login": false
+  },
+  {
+    "nome": "Teste Persistencia",
+    "matricula": "MAT999",
+    "cargo": "Assistente de Testes",
+    "status": "ativo",
+    "senha": "123456",
+    "trocar_senha_no_primeiro_login": true
+  },
+  {
+    "nome": "Oseia Oliveira",
+    "matricula": "MAT005",
+    "cargo": "Gerente",
+    "status": "ativo",
+    "senha": "123456",
+    "trocar_senha_no_primeiro_login": true
+  }
+]

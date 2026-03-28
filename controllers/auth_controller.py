@@ -67,7 +67,7 @@ def login():
                 else:
                     return redirect(url_for("admin_access"))
             else:
-                return redirect(url_for("home.index"))
+                return redirect(url_for("ponto.index"))
 
         if not error_message:
             error_message = "Usuario ou senha invalidos."

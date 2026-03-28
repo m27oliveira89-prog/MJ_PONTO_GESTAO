@@ -25,6 +25,10 @@ body {
     min-height: 100%;
 }
 
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
 body {
     background:
         radial-gradient(circle at top left, rgba(212, 175, 55, 0.12), transparent 28%),
@@ -253,6 +257,7 @@ body {
     border-radius: 16px;
     color: var(--text);
     font-size: 1rem;
+    min-height: 52px;
     outline: none;
     padding: 14px 16px;
     transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
@@ -269,6 +274,8 @@ body {
 }
 
 .primary-button {
+    -webkit-appearance: none;
+    appearance: none;
     background: linear-gradient(135deg, #d4af37 0%, #f2d675 100%);
     border: none;
     border-radius: 16px;
@@ -277,7 +284,9 @@ body {
     font-size: 1rem;
     font-weight: 800;
     letter-spacing: 0.02em;
+    min-height: 52px;
     padding: 15px 18px;
+    touch-action: manipulation;
     transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
 
@@ -312,8 +321,12 @@ body {
 
 .secondary-link {
     color: var(--primary);
+    display: inline-flex;
     font-size: 0.95rem;
     font-weight: 700;
+    justify-content: center;
+    min-height: 44px;
+    align-items: center;
     text-decoration: none;
     transition: opacity 0.2s ease, transform 0.2s ease;
 }
@@ -458,5 +471,24 @@ body {
         align-items: flex-start;
         flex-direction: column;
         gap: 10px;
+    }
+
+    .simple-auth-header h1,
+    .hero-copy h1,
+    .login-side h1 {
+        max-width: none;
+    }
+
+    .auth-form {
+        gap: 16px;
+    }
+
+    .field-group input,
+    .primary-button {
+        font-size: 16px;
+    }
+
+    .auth-actions {
+        margin-top: 16px;
     }
 }

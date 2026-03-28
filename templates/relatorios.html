@@ -83,7 +83,8 @@
         }
 
         .filters-panel input,
-        .filters-panel button {
+        .filters-panel button,
+        .filters-panel a {
             border-radius: 10px;
             font-size: 1rem;
             padding: 12px 14px;
@@ -94,13 +95,17 @@
             border: 1px solid var(--border-color);
         }
 
-        .filters-panel button {
+        .filters-panel button,
+        .filters-panel a {
             background-color: var(--primary-color);
             border: none;
             color: #ffffff;
             cursor: pointer;
+            display: inline-block;
             font-weight: 600;
             margin-top: 29px;
+            text-align: center;
+            text-decoration: none;
         }
 
         .stat-card {
@@ -211,6 +216,18 @@
                 <div>
                     <button type="submit">Gerar relatorio</button>
                 </div>
+
+                <div>
+                    <a href="{{ url_for('relatorios.index', funcionario='', data_inicial=current_month_start, data_final=current_month_end) }}">Relat&oacute;rio completo do m&ecirc;s</a>
+                </div>
+
+                <div>
+                    <a href="{{ url_for('exportacao.pdf', funcionario=filters.funcionario, data_inicial=filters.data_inicial, data_final=filters.data_final) }}">Exportar PDF</a>
+                </div>
+
+                <div>
+                    <a href="{{ url_for('exportacao.csv', funcionario=filters.funcionario, data_inicial=filters.data_inicial, data_final=filters.data_final) }}">Exportar relat&oacute;rio</a>
+                </div>
             </form>
 
             <section class="stats-grid">
@@ -295,7 +312,13 @@
                                 <td>{{ registro.funcionario }}</td>
                                 <td>{{ registro.latitude if registro.latitude is not none else "-" }}</td>
                                 <td>{{ registro.longitude if registro.longitude is not none else "-" }}</td>
-                                <td>{{ "Sim" if registro.foto_url else "Nao" }}</td>
+                                <td>
+                                    {% if registro.foto_url %}
+                                    <a href="{{ registro.foto_url }}" target="_blank" rel="noopener noreferrer">Abrir foto</a>
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>

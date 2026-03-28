@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask, redirect, render_template, request, session, url_for
 
 from config import Config
@@ -14,6 +16,7 @@ from controllers.relatorios_controller import relatorios_bp
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY") or Config.SECRET_KEY
     app.register_blueprint(admin_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(exportacao_bp)
@@ -60,4 +63,6 @@ app = create_app()
 
 
 if __name__ == "__main__":
-    app.run(debug=Config.DEBUG)
+    port = int(os.getenv("PORT", "5000"))
+    debug = os.getenv("FLASK_DEBUG", "false").lower() == "true"
+    app.run(host="0.0.0.0", port=port, debug=debug)

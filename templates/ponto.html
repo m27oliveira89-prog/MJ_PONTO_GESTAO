@@ -1,10 +1,10 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ page_title or "Bater Ponto" }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+{% extends "base.html" %}
+
+{% block page %}
+<script defer src="{{ url_for('static', filename='js/gps.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/camera.js') }}"></script>
+
+<section class="page-shell">
     <style>
         .page-shell {
             margin: 0 auto;
@@ -27,12 +27,12 @@
         }
 
         .page-header p {
-            color: var(--muted-color);
+            color: var(--muted);
         }
 
         .user-badge {
-            background-color: var(--surface-color);
-            border: 1px solid var(--border-color);
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 12px;
             padding: 12px 16px;
         }
@@ -44,10 +44,10 @@
         }
 
         .panel {
-            background-color: var(--surface-color);
-            border: 1px solid var(--border-color);
+            background-color: rgba(20, 25, 34, 0.92);
+            border: 1px solid var(--border);
             border-radius: 16px;
-            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+            box-shadow: var(--shadow);
             padding: 24px;
         }
 
@@ -71,20 +71,48 @@
         .form-grid button {
             border-radius: 10px;
             font-size: 1rem;
+            min-height: 52px;
             padding: 12px 14px;
             width: 100%;
         }
 
         .form-grid select {
-            border: 1px solid var(--border-color);
+            appearance: none;
+            background: var(--bg-elevated);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text);
         }
 
         .form-grid button {
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, #d4af37 0%, #f2d675 100%);
             border: none;
-            color: #ffffff;
+            color: #0e1117;
             cursor: pointer;
-            font-weight: 600;
+            font-weight: 700;
+            touch-action: manipulation;
+        }
+
+        .camera-preview,
+        .camera-photo {
+            background-color: #d9e2ec;
+            border-radius: 12px;
+            width: 100%;
+        }
+
+        .camera-photo[hidden],
+        .camera-preview[hidden] {
+            display: none;
+        }
+
+        .camera-actions {
+            display: grid;
+            gap: 10px;
+        }
+
+        .status-text {
+            color: var(--muted);
+            font-size: 0.92rem;
+            line-height: 1.6;
         }
 
         .message {
@@ -94,13 +122,13 @@
         }
 
         .message.error {
-            background-color: #fde8e8;
-            color: #9b1c1c;
+            background: var(--danger-bg);
+            color: var(--danger-text);
         }
 
         .message.success {
-            background-color: #e6fffa;
-            color: #0f766e;
+            background: rgba(16, 185, 129, 0.14);
+            color: #bbf7d0;
         }
 
         .table-wrapper {
@@ -114,19 +142,19 @@
 
         th,
         td {
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             padding: 12px 10px;
             text-align: left;
         }
 
         th {
-            color: var(--muted-color);
+            color: var(--muted);
             font-size: 0.9rem;
             text-transform: uppercase;
         }
 
         .empty-state {
-            color: var(--muted-color);
+            color: var(--muted);
             padding-top: 8px;
         }
 
@@ -140,15 +168,48 @@
                 flex-direction: column;
             }
         }
+
+        @media (max-width: 640px) {
+            .page-shell {
+                padding: 18px 0 28px;
+            }
+
+            .page-header h1 {
+                font-size: 1.7rem;
+            }
+
+            .panel {
+                border-radius: 18px;
+                padding: 18px;
+            }
+
+            .table-wrapper {
+                margin: 0 -4px;
+            }
+
+            table {
+                font-size: 0.92rem;
+                min-width: 760px;
+            }
+
+            th,
+            td {
+                padding: 10px 8px;
+            }
+        }
     </style>
-</head>
-<body>
-    <main class="page-shell">
+
         <header class="page-header">
             <div>
                 <span class="tag">Registro de Jornada</span>
                 <h1>Bater Ponto</h1>
-                <p>Selecione um funcionario ativo para registrar data e hora do ponto.</p>
+                <p>
+                    {% if is_admin %}
+                    Selecione um funcionario ativo para registrar data e hora do ponto.
+                    {% else %}
+                    Informe o tipo de registro e confirme o envio do seu ponto.
+                    {% endif %}
+                </p>
             </div>
 
             <div class="user-badge">
@@ -165,11 +226,15 @@
                 <div class="message error">{{ error_message }}</div>
                 {% endif %}
 
+                <div class="message error" data-gps-error hidden></div>
+                <div class="message error" data-camera-error hidden></div>
+
                 {% if success_message %}
                 <div class="message success">{{ success_message }}</div>
                 {% endif %}
 
                 <form method="post" class="form-grid">
+                    {% if is_admin %}
                     <div>
                         <label for="matricula">Funcionario</label>
                         <select id="matricula" name="matricula" required>
@@ -181,13 +246,61 @@
                             {% endfor %}
                         </select>
                     </div>
+                    {% else %}
+                    <div>
+                        <label>Funcionario</label>
+                        <div class="user-badge">
+                            <strong>{{ current_user.display_name }}</strong><br>
+                            <span>Matricula: {{ current_user.matricula }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div>
+                        <label for="tipo">Tipo do ponto</label>
+                        <select id="tipo" name="tipo" required>
+                            <option value="">Selecione o tipo do ponto</option>
+                            <option value="entrada">Entrada</option>
+                            <option value="almoco_saida">Almoco Saida</option>
+                            <option value="retorno">Retorno</option>
+                            <option value="saida_final">Saida Final</option>
+                        </select>
+                    </div>
+
+                    <input type="hidden" name="foto_url">
+                    <input type="hidden" name="latitude">
+                    <input type="hidden" name="longitude">
+
+                    <div>
+                        <label>Status do GPS</label>
+                        <p class="status-text" data-gps-status>Solicitando localizacao do dispositivo.</p>
+                    </div>
+
+                    <div>
+                        <label>Captura de foto</label>
+                        <div class="camera-actions">
+                            <button type="button" data-camera-open>Abrir c&acirc;mera</button>
+                            <video
+                                class="camera-preview"
+                                data-camera-preview
+                                autoplay
+                                playsinline
+                                muted
+                                hidden
+                            ></video>
+                            <canvas data-camera-canvas hidden></canvas>
+                            <img class="camera-photo" data-camera-photo-preview alt="Foto capturada" hidden>
+                            <button type="button" data-camera-capture>Capturar foto</button>
+                            <p class="status-text" data-camera-status>Aguardando captura da foto.</p>
+                        </div>
+                    </div>
 
                     <button type="submit">Bater ponto</button>
                 </form>
             </article>
 
             <article class="panel">
-                <h2>Pontos Registrados</h2>
+                <h2>{% if is_admin %}Pontos Registrados{% else %}Meus Registros{% endif %}</h2>
 
                 {% if registros %}
                 <div class="table-wrapper">
@@ -199,6 +312,10 @@
                                 <th>Cargo</th>
                                 <th>Data</th>
                                 <th>Hora</th>
+                                <th>Tipo</th>
+                                <th>Latitude</th>
+                                <th>Longitude</th>
+                                <th>Foto</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -209,6 +326,16 @@
                                 <td>{{ registro.cargo if registro.cargo is defined else "-" }}</td>
                                 <td>{{ registro.data }}</td>
                                 <td>{{ registro.hora }}</td>
+                                <td>{{ registro.tipo_label if registro.tipo_label is defined else "-" }}</td>
+                                <td>{{ registro.latitude if registro.latitude is not none else "-" }}</td>
+                                <td>{{ registro.longitude if registro.longitude is not none else "-" }}</td>
+                                <td>
+                                    {% if registro.foto_url %}
+                                    <a href="{{ registro.foto_url }}" target="_blank" rel="noopener noreferrer">Abrir foto</a>
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -219,6 +346,5 @@
                 {% endif %}
             </article>
         </section>
-    </main>
-</body>
-</html>
+    </section>
+{% endblock %}

@@ -28,27 +28,18 @@ Defina estas variaveis no ambiente local ou no provedor de hospedagem:
 - `SECRET_KEY`
 - `FIREBASE_PROJECT_ID`
 - `FIREBASE_STORAGE_BUCKET`
-- `FIREBASE_CREDENTIALS_PATH` ou `GOOGLE_APPLICATION_CREDENTIALS`
-- `FIREBASE_CREDENTIALS_JSON` como alternativa para deploy sem arquivo fisico
+- `FIREBASE_CREDENTIALS_JSON` com o JSON completo da service account
 - `FLASK_ENV=production` em producao
 - `FLASK_DEBUG=false` em producao
 - `AUTO_OPEN_BROWSER=false` em producao
-- `PORT` quando o provedor fornecer a porta dinamicamente
 
 ## Credenciais do Firebase
 
-Para ambiente hospedado, prefira usar:
+Para ambiente local e hospedado, use:
 
 - `FIREBASE_CREDENTIALS_JSON` com o JSON completo da service account
 
-O projeto converte esse JSON em um arquivo temporario em tempo de execucao, sem exigir que a credencial fique salva no repositorio.
-
-Para ambiente local, voce tambem pode usar:
-
-- `FIREBASE_CREDENTIALS_PATH`
-- `GOOGLE_APPLICATION_CREDENTIALS`
-
-Apontando para um arquivo fora do repositorio ou ignorado pelo Git.
+O projeto converte esse JSON diretamente para dicionario em tempo de execucao, sem exigir arquivo de credencial no repositorio ou no servidor.
 
 ## Execucao local
 
@@ -63,7 +54,7 @@ Exemplo de configuracao local:
 $env:SECRET_KEY="uma-chave-local"
 $env:FIREBASE_PROJECT_ID="seu-projeto"
 $env:FIREBASE_STORAGE_BUCKET="seu-bucket.appspot.com"
-$env:FIREBASE_CREDENTIALS_PATH="C:\credenciais\firebase.json"
+$env:FIREBASE_CREDENTIALS_JSON='{"type":"service_account","project_id":"seu-projeto"}'
 python app.py
 ```
 

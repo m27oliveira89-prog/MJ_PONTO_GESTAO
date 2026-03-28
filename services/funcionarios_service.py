@@ -1,4 +1,8 @@
-FUNCIONARIOS = [
+import json
+import os
+
+
+DEFAULT_FUNCIONARIOS = [
     {
         "nome": "David Cerqueira",
         "matricula": "MAT001",
@@ -33,12 +37,40 @@ FUNCIONARIOS = [
     },
 ]
 
+FUNCIONARIOS_FILE = os.path.join("database", "funcionarios.json")
+
 REQUIRED_FIELDS = (
     "nome",
     "matricula",
     "cargo",
     "status",
 )
+
+
+def _load_funcionarios():
+    if not os.path.exists(FUNCIONARIOS_FILE):
+        return [dict(funcionario) for funcionario in DEFAULT_FUNCIONARIOS]
+
+    try:
+        with open(FUNCIONARIOS_FILE, "r", encoding="utf-8") as funcionarios_file:
+            loaded_funcionarios = json.load(funcionarios_file)
+    except (OSError, json.JSONDecodeError):
+        return [dict(funcionario) for funcionario in DEFAULT_FUNCIONARIOS]
+
+    if not isinstance(loaded_funcionarios, list):
+        return [dict(funcionario) for funcionario in DEFAULT_FUNCIONARIOS]
+
+    return loaded_funcionarios
+
+
+def _save_funcionarios():
+    os.makedirs(os.path.dirname(FUNCIONARIOS_FILE), exist_ok=True)
+
+    with open(FUNCIONARIOS_FILE, "w", encoding="utf-8") as funcionarios_file:
+        json.dump(FUNCIONARIOS, funcionarios_file, ensure_ascii=False, indent=2)
+
+
+FUNCIONARIOS = _load_funcionarios()
 
 
 def list_funcionarios():
@@ -70,6 +102,7 @@ def create_funcionario(funcionario_data):
         raise ValueError("Ja existe um funcionario cadastrado com esta matricula.")
 
     FUNCIONARIOS.append(cleaned_data)
+    _save_funcionarios()
     return cleaned_data
 
 
@@ -95,6 +128,7 @@ def update_funcionario(matricula_original, funcionario_data):
             funcionario.update(cleaned_data)
             funcionario["senha"] = senha_atual
             funcionario["trocar_senha_no_primeiro_login"] = trocar_senha
+            _save_funcionarios()
             return funcionario
 
     raise ValueError("Funcionario nao encontrado.")
@@ -113,6 +147,7 @@ def set_funcionario_status(matricula, status):
     for funcionario in FUNCIONARIOS:
         if funcionario["matricula"] == normalized_matricula:
             funcionario["status"] = normalized_status
+            _save_funcionarios()
             return funcionario
 
     raise ValueError("Funcionario nao encontrado.")
@@ -132,6 +167,7 @@ def reset_funcionario_password(matricula, nova_senha):
         if funcionario["matricula"] == normalized_matricula:
             funcionario["senha"] = normalized_password
             funcionario["trocar_senha_no_primeiro_login"] = True
+            _save_funcionarios()
             return funcionario
 
     raise ValueError("Funcionario nao encontrado.")
@@ -151,6 +187,7 @@ def change_funcionario_password(matricula, nova_senha):
         if funcionario["matricula"] == normalized_matricula:
             funcionario["senha"] = normalized_password
             funcionario["trocar_senha_no_primeiro_login"] = False
+            _save_funcionarios()
             return funcionario
 
     raise ValueError("Funcionario nao encontrado.")

@@ -2,7 +2,7 @@ from functools import wraps
 
 from flask import Blueprint, abort, make_response, request, session
 
-from services.exportacao_service import exportar_excel, exportar_pdf
+from services.exportacao_service import exportar_csv, exportar_pdf
 
 
 exportacao_bp = Blueprint("exportacao", __name__, url_prefix="/exportacao")
@@ -32,10 +32,10 @@ def _build_filters():
     }
 
 
-@exportacao_bp.route("/excel", methods=["GET"])
+@exportacao_bp.route("/csv", methods=["GET"])
 @admin_required
-def excel():
-    content, filename, mimetype = exportar_excel(_build_filters())
+def csv():
+    content, filename, mimetype = exportar_csv(_build_filters())
     response = make_response(content)
     response.headers["Content-Type"] = mimetype
     response.headers["Content-Disposition"] = f'attachment; filename="{filename}"'
@@ -45,7 +45,10 @@ def excel():
 @exportacao_bp.route("/pdf", methods=["GET"])
 @admin_required
 def pdf():
-    content, filename, mimetype = exportar_pdf(_build_filters())
+    content, filename, mimetype = exportar_pdf(
+        _build_filters(),
+        current_user=session.get("user"),
+    )
     response = make_response(content)
     response.headers["Content-Type"] = mimetype
     response.headers["Content-Disposition"] = f'attachment; filename="{filename}"'

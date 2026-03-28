@@ -45,7 +45,7 @@
         .grid {
             display: grid;
             gap: 24px;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            grid-template-columns: minmax(320px, 380px) minmax(0, 1.45fr);
         }
 
         .panel {
@@ -217,6 +217,12 @@
             text-align: left;
         }
 
+        td:nth-child(3),
+        th:nth-child(3) {
+            min-width: 170px;
+            white-space: nowrap;
+        }
+
         th {
             color: var(--muted-color);
             font-size: 0.9rem;
@@ -240,6 +246,12 @@
             font-size: 0.88rem;
             line-height: 1.5;
             margin-top: -6px;
+        }
+
+        @media (max-width: 900px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>

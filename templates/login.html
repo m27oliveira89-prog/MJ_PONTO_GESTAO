@@ -5,13 +5,13 @@
     <article class="glass-card simple-auth-card">
         <div class="simple-auth-header">
             <span class="brand-chip">MJ PONTO GESTAO</span>
-            <p class="eyebrow">{% if access_mode == "admin" %}Acesso Administrativo{% else %}Entrada no Sistema{% endif %}</p>
-            <h1>{% if access_mode == "admin" %}Area Administrativa{% else %}Entrar{% endif %}</h1>
+            <p class="eyebrow">{% if access_mode == "admin" %}Acesso Administrativo{% else %}Registro de Ponto{% endif %}</p>
+            <h1>{% if access_mode == "admin" %}Area Administrativa{% else %}Bater o ponto{% endif %}</h1>
             <p class="simple-subtitle">
                 {% if access_mode == "admin" %}
                 Informe suas credenciais para acessar os recursos administrativos.
                 {% else %}
-                Informe usuario e senha para entrar no sistema.
+                Informe usuario e senha para registrar seu ponto.
                 {% endif %}
             </p>
         </div>
@@ -21,19 +21,19 @@
 
             <div class="field-group">
                 <label for="username">Usuario</label>
-                <input id="username" name="username" type="text" placeholder="Digite seu usuario" required>
+                <input id="username" name="username" type="text" placeholder="Digite seu usuario" autocomplete="username" autocapitalize="none" required>
             </div>
 
             <div class="field-group">
                 <label for="password">Senha</label>
-                <input id="password" name="password" type="password" placeholder="Digite sua senha" required>
+                <input id="password" name="password" type="password" placeholder="Digite sua senha" autocomplete="current-password" required>
             </div>
 
             {% if error_message %}
             <div class="feedback feedback-error">{{ error_message }}</div>
             {% endif %}
 
-            <button type="submit" class="primary-button">Entrar</button>
+            <button type="submit" class="primary-button">{% if access_mode == "admin" %}Entrar{% else %}Bater o ponto{% endif %}</button>
         </form>
 
         <div class="auth-actions">

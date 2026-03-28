@@ -1,0 +1,40 @@
+[
+  {
+    "data": "2026-03-28",
+    "hora": "18:20:10",
+    "tipo": "entrada",
+    "tipo_label": "Entrada",
+    "funcionario": "David Cerqueira",
+    "matricula": "MAT001",
+    "cargo": "Motorista",
+    "latitude": "-3.10194",
+    "longitude": "-60.025",
+    "foto_url": "/static/uploads/fotos_ponto/david_cerqueira_20260328_182010_3d8644a1.jpg"
+  },
+  {
+    "data": "2026-03-28",
+    "hora": "18:53:24",
+    "timestamp": "2026-03-28T18:53:24",
+    "tipo": "almoco_saida",
+    "tipo_label": "Almoco Saida",
+    "funcionario": "Lucio M",
+    "matricula": "MAT002",
+    "cargo": "Auxiliar Administrativo",
+    "latitude": "-3.10",
+    "longitude": "-60.02",
+    "foto_url": "/static/uploads/fotos_ponto/lucio_m_20260328_185324_ce334a2a.jpg"
+  },
+  {
+    "data": "2026-03-28",
+    "hora": "19:07:04",
+    "timestamp": "2026-03-28T19:07:04",
+    "tipo": "entrada",
+    "tipo_label": "Entrada",
+    "funcionario": "David Cerqueira",
+    "matricula": "MAT001",
+    "cargo": "Motorista",
+    "latitude": "-3.10",
+    "longitude": "-60.02",
+    "foto_url": "/static/uploads/fotos_ponto/david_cerqueira_20260328_190704_38a237ce.jpg"
+  }
+]

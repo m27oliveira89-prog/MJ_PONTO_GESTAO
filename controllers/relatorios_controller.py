@@ -1,4 +1,5 @@
 from functools import wraps
+from datetime import datetime
 
 from flask import Blueprint, abort, render_template, request, session
 
@@ -27,6 +28,10 @@ def admin_required(view_func):
 @relatorios_bp.route("/", methods=["GET"])
 @admin_required
 def index():
+    today = datetime.now().date()
+    current_month_start = today.replace(day=1).isoformat()
+    current_month_end = today.isoformat()
+
     filters = {
         "funcionario": request.args.get("funcionario", "").strip(),
         "data_inicial": request.args.get("data_inicial", "").strip(),
@@ -41,4 +46,6 @@ def index():
         relatorio=relatorio,
         filters=filters,
         current_user=session.get("user"),
+        current_month_start=current_month_start,
+        current_month_end=current_month_end,
     )
