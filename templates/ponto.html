@@ -101,12 +101,18 @@
             touch-action: manipulation;
         }
 
+        .camera-block {
+            display: grid;
+            justify-items: center;
+        }
+
         .camera-preview,
         .camera-photo {
             background-color: #d9e2ec;
             border-radius: 12px;
             display: block;
             margin: 0 auto;
+            max-height: 240px;
             max-width: 260px;
             width: 100%;
         }
@@ -130,6 +136,7 @@
             display: grid;
             gap: 10px;
             justify-items: center;
+            width: 100%;
         }
 
         .camera-actions button,
@@ -138,7 +145,7 @@
         }
 
         .camera-actions button {
-            max-width: 260px;
+            max-width: 220px;
         }
 
         .status-card {
@@ -210,85 +217,97 @@
 
         @media (max-width: 640px) {
             .page-shell {
-                max-width: 420px;
-                padding: 16px 0 28px;
+                max-width: 390px;
+                padding: 14px 0 24px;
             }
 
             .page-header {
                 align-items: center;
-                gap: 12px;
-                margin-bottom: 18px;
+                gap: 10px;
+                margin-bottom: 16px;
                 text-align: center;
             }
 
             .header-copy {
                 margin: 0 auto;
-                max-width: 320px;
+                max-width: 300px;
             }
 
             .page-header h1 {
-                font-size: 1.55rem;
-                margin-bottom: 6px;
+                font-size: 1.45rem;
+                margin-bottom: 4px;
             }
 
             .page-header p {
-                font-size: 0.92rem;
-                line-height: 1.55;
+                font-size: 0.88rem;
+                line-height: 1.5;
             }
 
             .user-badge {
                 margin: 0 auto;
-                max-width: 280px;
+                max-width: 250px;
+                padding: 10px 12px;
                 text-align: center;
                 width: 100%;
             }
 
             .grid {
-                gap: 16px;
+                gap: 14px;
             }
 
             .panel {
-                border-radius: 18px;
+                border-radius: 16px;
                 margin: 0 auto;
-                max-width: 360px;
-                padding: 16px;
+                max-width: 332px;
+                padding: 14px;
                 width: 100%;
             }
 
             .panel h2 {
-                font-size: 1.05rem;
-                margin-bottom: 14px;
+                font-size: 1rem;
+                margin-bottom: 12px;
                 text-align: center;
             }
 
             .form-grid {
-                gap: 12px;
+                gap: 10px;
                 justify-items: center;
             }
 
             .field-group,
-            .submit-button,
             .message,
             .status-card {
-                max-width: 300px;
+                max-width: 272px;
+                width: 100%;
+            }
+
+            .field-group .user-badge {
+                max-width: 100%;
                 width: 100%;
             }
 
             .field-group label {
-                font-size: 0.88rem;
+                font-size: 0.84rem;
+                padding-left: 2px;
                 text-align: left;
             }
 
             .form-grid select,
             .form-grid button {
-                font-size: 0.95rem;
-                min-height: 46px;
-                padding: 10px 12px;
+                font-size: 0.9rem;
+                min-height: 40px;
+                padding: 8px 10px;
+            }
+
+            .camera-block {
+                width: 100%;
             }
 
             .camera-preview,
             .camera-photo {
-                max-width: 220px;
+                border-radius: 10px;
+                max-height: 180px;
+                max-width: 180px;
             }
 
             .camera-actions {
@@ -297,41 +316,53 @@
 
             .camera-actions button,
             .submit-button {
+                margin: 0 auto;
+                max-width: 180px;
+                min-height: 38px;
+                width: 100%;
+            }
+
+            .camera-actions .status-card {
                 max-width: 220px;
             }
 
+            .status-card {
+                padding: 10px 12px;
+            }
+
             .status-text {
-                font-size: 0.85rem;
+                font-size: 0.8rem;
+                line-height: 1.45;
                 text-align: center;
             }
 
             .message {
-                font-size: 0.9rem;
-                margin-bottom: 12px;
-                padding: 10px 12px;
+                font-size: 0.86rem;
+                margin-bottom: 10px;
+                padding: 9px 10px;
                 text-align: center;
             }
 
             .table-wrapper {
-                margin: 0 -4px;
+                margin: 0 -2px;
             }
 
             table {
-                font-size: 0.84rem;
-                min-width: 680px;
+                font-size: 0.8rem;
+                min-width: 620px;
             }
 
             th,
             td {
-                padding: 9px 8px;
+                padding: 8px 7px;
             }
 
             th {
-                font-size: 0.75rem;
+                font-size: 0.72rem;
             }
 
             .empty-state {
-                font-size: 0.9rem;
+                font-size: 0.86rem;
                 text-align: center;
             }
         }
@@ -418,21 +449,23 @@
 
                 <div class="field-group">
                     <label>Captura de foto</label>
-                    <div class="camera-actions">
-                        <button type="button" data-camera-open>Abrir c&acirc;mera</button>
-                        <video
-                            class="camera-preview"
-                            data-camera-preview
-                            autoplay
-                            playsinline
-                            muted
-                            hidden
-                        ></video>
-                        <canvas data-camera-canvas hidden></canvas>
-                        <img class="camera-photo" data-camera-photo-preview alt="Foto capturada" hidden>
-                        <button type="button" data-camera-capture>Capturar foto</button>
-                        <div class="status-card">
-                            <p class="status-text" data-camera-status>Aguardando captura da foto.</p>
+                    <div class="camera-block">
+                        <div class="camera-actions">
+                            <button type="button" data-camera-open>Abrir c&acirc;mera</button>
+                            <video
+                                class="camera-preview"
+                                data-camera-preview
+                                autoplay
+                                playsinline
+                                muted
+                                hidden
+                            ></video>
+                            <canvas data-camera-canvas hidden></canvas>
+                            <img class="camera-photo" data-camera-photo-preview alt="Foto capturada" hidden>
+                            <button type="button" data-camera-capture>Capturar foto</button>
+                            <div class="status-card">
+                                <p class="status-text" data-camera-status>Aguardando captura da foto.</p>
+                            </div>
                         </div>
                     </div>
                 </div>

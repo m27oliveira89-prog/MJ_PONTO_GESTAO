@@ -49,9 +49,6 @@ def _save_registros():
         json.dump(REGISTROS_PONTO, registros_file, ensure_ascii=False, indent=2)
 
 
-REGISTROS_PONTO.extend(_load_registros())
-
-
 def registrar_ponto(tipo, funcionario, latitude=None, longitude=None, foto_url=None):
     tipo_normalizado = _normalize_tipo(tipo)
     ponto_rules = get_ponto_rules()
@@ -425,3 +422,6 @@ def _sort_key(registro):
         registro.get("data", ""),
         registro.get("hora", ""),
     )
+
+
+REGISTROS_PONTO.extend(_load_registros())
