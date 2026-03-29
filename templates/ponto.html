@@ -178,7 +178,9 @@
         }
 
         .table-wrapper {
+            max-width: 100%;
             overflow-x: auto;
+            width: 100%;
         }
 
         table {
@@ -218,6 +220,7 @@
         @media (max-width: 640px) {
             .page-shell {
                 max-width: 390px;
+                overflow-x: hidden;
                 padding: 14px 0 24px;
             }
 
@@ -259,6 +262,7 @@
                 border-radius: 16px;
                 margin: 0 auto;
                 max-width: 332px;
+                overflow: hidden;
                 padding: 14px;
                 width: 100%;
             }
@@ -281,6 +285,10 @@
                 width: 100%;
             }
 
+            .field-group {
+                justify-items: center;
+            }
+
             .field-group .user-badge {
                 max-width: 100%;
                 width: 100%;
@@ -288,8 +296,8 @@
 
             .field-group label {
                 font-size: 0.84rem;
-                padding-left: 2px;
-                text-align: left;
+                padding-left: 0;
+                text-align: center;
             }
 
             .form-grid select,
@@ -297,9 +305,12 @@
                 font-size: 0.9rem;
                 min-height: 40px;
                 padding: 8px 10px;
+                text-align: center;
             }
 
             .camera-block {
+                display: grid;
+                justify-items: center;
                 width: 100%;
             }
 
@@ -312,6 +323,7 @@
 
             .camera-actions {
                 gap: 8px;
+                justify-items: center;
             }
 
             .camera-actions button,
@@ -345,6 +357,8 @@
 
             .table-wrapper {
                 margin: 0 -2px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
             }
 
             table {
