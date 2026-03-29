@@ -62,6 +62,7 @@ def index():
                 foto_base64=foto_base64,
                 latitude=latitude,
                 longitude=longitude,
+                origem="mobile" if request.is_json else "web",
             )
             success_message = "Ponto registrado com sucesso."
 

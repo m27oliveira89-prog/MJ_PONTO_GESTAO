@@ -19,18 +19,29 @@ PDF_MARGIN_LEFT = 40
 PDF_MARGIN_RIGHT = 40
 PDF_TOP_Y = 800
 PDF_FOOTER_Y = 28
-PDF_MIN_TABLE_Y = 80
-PDF_TABLE_HEADER_HEIGHT = 20
-PDF_TABLE_ROW_HEIGHT = 18
+PDF_MIN_TABLE_Y = 92
+PDF_TABLE_HEADER_HEIGHT = 26
+PDF_TABLE_ROW_HEIGHT = 24
 PDF_TABLE_COLUMNS = (
-    ("Data", 70),
-    ("Entrada", 52),
-    ("Saida Almoco", 72),
-    ("Retorno", 52),
-    ("Saida Final", 62),
-    ("Horas Trabalhadas", 86),
-    ("Observacao", 111),
+    ("Data", 72),
+    ("Entrada", 54),
+    ("Saida Almoco", 76),
+    ("Retorno", 54),
+    ("Saida Final", 66),
+    ("Horas Trabalhadas", 94),
+    ("Observacao", 99),
 )
+
+PDF_COLOR_BLACK = 0
+PDF_COLOR_DARK = 0.15
+PDF_COLOR_MID = 0.35
+PDF_COLOR_LIGHT = 0.92
+PDF_COLOR_HEADER_FILL = 0.82
+PDF_COLOR_SUMMARY_FILL = 0.94
+PDF_COLOR_ALT_ROW_FILL = 0.965
+PDF_LINE_STRONG = 1.2
+PDF_LINE_NORMAL = 0.9
+PDF_LINE_THIN = 0.6
 
 
 def exportar_csv(filters):
@@ -104,7 +115,7 @@ def _build_espelho_pdf(relatorio, filters, current_user=None):
     if not sections:
         page = _new_page(pages)
         _draw_report_title(page)
-        page["y"] -= 36
+        page["y"] -= 40
         _draw_info_line(page, "Periodo", _resolve_periodo(filters))
         _draw_info_line(
             page,
@@ -113,12 +124,9 @@ def _build_espelho_pdf(relatorio, filters, current_user=None):
         )
         _draw_info_line(page, "Emitido por", _resolve_emissor(current_user))
         page["y"] -= 18
-        _draw_text(
+        _draw_empty_box(
             page,
-            PDF_MARGIN_LEFT,
-            page["y"],
-            "Nenhum registro encontrado para o periodo selecionado",
-            size=10,
+            "Nenhum registro encontrado para o periodo selecionado.",
         )
     else:
         for section_index, section in enumerate(sections):
@@ -131,7 +139,7 @@ def _build_espelho_pdf(relatorio, filters, current_user=None):
                 continuation=False,
             )
 
-            for row in section["rows"]:
+            for row_index, row in enumerate(section["rows"]):
                 if page["y"] - PDF_TABLE_ROW_HEIGHT < PDF_MIN_TABLE_Y:
                     page = _start_section_page(
                         pages,
@@ -141,11 +149,12 @@ def _build_espelho_pdf(relatorio, filters, current_user=None):
                         current_user=current_user,
                         continuation=True,
                     )
+                    row_index = 0
 
-                _draw_table_row(page, row)
+                _draw_table_row(page, row, is_alt_row=(row_index % 2 == 1))
 
             if section_index < len(sections) - 1:
-                page["y"] -= 14
+                page["y"] -= 16
 
     for index, page in enumerate(pages, start=1):
         _draw_footer(
@@ -204,7 +213,10 @@ def _build_daily_rows(registros):
             "observacao": "Batidas incompletas",
         }
 
-        registros_do_dia = sorted(grouped_by_date[data], key=lambda item: item.get("hora", ""))
+        registros_do_dia = sorted(
+            grouped_by_date[data],
+            key=lambda item: item.get("hora", ""),
+        )
 
         for registro in registros_do_dia:
             tipo = (registro.get("tipo") or "").strip().lower()
@@ -268,7 +280,9 @@ def _calculate_worked_minutes(entrada, almoco_saida, retorno, saida_final):
     if None in {entrada_min, almoco_saida_min, retorno_min, saida_final_min}:
         return None
 
-    total_minutes = (saida_final_min - entrada_min) - (retorno_min - almoco_saida_min)
+    total_minutes = (saida_final_min - entrada_min) - (
+        retorno_min - almoco_saida_min
+    )
 
     if total_minutes < 0:
         return None
@@ -351,7 +365,11 @@ def _resolve_emissor(current_user):
     if not current_user:
         return "Nao informado"
 
-    return current_user.get("display_name") or current_user.get("username") or "Nao informado"
+    return (
+        current_user.get("display_name")
+        or current_user.get("username")
+        or "Nao informado"
+    )
 
 
 def _new_page(pages):
@@ -360,10 +378,17 @@ def _new_page(pages):
     return page
 
 
-def _start_section_page(pages, section, filters, emission_datetime, current_user=None, continuation=False):
+def _start_section_page(
+    pages,
+    section,
+    filters,
+    emission_datetime,
+    current_user=None,
+    continuation=False,
+):
     page = _new_page(pages)
     _draw_report_title(page)
-    page["y"] -= 36
+    page["y"] -= 38
 
     _draw_info_line(page, "Funcionario", section["funcionario"])
     _draw_info_line(page, "Matricula", section["matricula"])
@@ -378,7 +403,14 @@ def _start_section_page(pages, section, filters, emission_datetime, current_user
     page["y"] -= 10
 
     if continuation:
-        _draw_text(page, PDF_MARGIN_LEFT, page["y"], "Continuacao", font="F2", size=9)
+        _draw_text(
+            page,
+            PDF_MARGIN_LEFT,
+            page["y"],
+            "CONTINUACAO DO ESPELHO DE PONTO",
+            font="F2",
+            size=9,
+        )
         page["y"] -= 18
     else:
         _draw_summary_section(page, section["summary"])
@@ -389,83 +421,151 @@ def _start_section_page(pages, section, filters, emission_datetime, current_user
 
 def _draw_report_title(page):
     title = "ESPELHO DE PONTO"
-    _draw_text(page, PDF_MARGIN_LEFT, page["y"], title, font="F2", size=16)
+    _draw_text(page, PDF_MARGIN_LEFT, page["y"], title, font="F2", size=17)
     _draw_line(
         page,
         PDF_MARGIN_LEFT,
-        page["y"] - 8,
+        page["y"] - 10,
         PDF_PAGE_WIDTH - PDF_MARGIN_RIGHT,
-        page["y"] - 8,
+        page["y"] - 10,
+        gray=PDF_COLOR_BLACK,
+        width=PDF_LINE_STRONG,
     )
 
 
 def _draw_info_line(page, label, value):
-    _draw_text(page, PDF_MARGIN_LEFT, page["y"], f"{label}: {value}", size=10)
+    _draw_text(page, PDF_MARGIN_LEFT, page["y"], f"{label}:", font="F2", size=9)
+    _draw_text(page, PDF_MARGIN_LEFT + 74, page["y"], value, size=9)
     page["y"] -= 14
 
 
 def _draw_summary_section(page, summary):
-    _draw_text(page, PDF_MARGIN_LEFT, page["y"], "Resumo Geral", font="F2", size=11)
-    page["y"] -= 16
-    _draw_text(
+    summary_width = PDF_PAGE_WIDTH - PDF_MARGIN_LEFT - PDF_MARGIN_RIGHT
+    summary_height = 54
+    y_bottom = page["y"] - summary_height + 6
+
+    _draw_rect(
         page,
         PDF_MARGIN_LEFT,
-        page["y"],
+        y_bottom,
+        summary_width,
+        summary_height,
+        fill_gray=PDF_COLOR_SUMMARY_FILL,
+        stroke_gray=PDF_COLOR_BLACK,
+        stroke_width=PDF_LINE_STRONG,
+    )
+    _draw_text(
+        page,
+        PDF_MARGIN_LEFT + 10,
+        page["y"] - 10,
+        "RESUMO GERAL",
+        font="F2",
+        size=10,
+    )
+    _draw_text(
+        page,
+        PDF_MARGIN_LEFT + 10,
+        page["y"] - 25,
         (
-            f"Total de dias com registro: {summary['dias_com_registro']}    "
-            f"Total de entradas: {summary['entradas']}    "
-            f"Saidas para almoco: {summary['almoco_saida']}"
+            f"Dias com registro: {summary['dias_com_registro']}    "
+            f"Entradas: {summary['entradas']}    "
+            f"Saidas almoco: {summary['almoco_saida']}"
         ),
         size=9,
     )
-    page["y"] -= 14
     _draw_text(
         page,
-        PDF_MARGIN_LEFT,
-        page["y"],
+        PDF_MARGIN_LEFT + 10,
+        page["y"] - 39,
         (
             f"Retornos: {summary['retornos']}    "
             f"Saidas finais: {summary['saidas_finais']}    "
-            f"Total de horas apuradas no periodo: {summary['horas_apuradas']}"
+            f"Horas apuradas: {summary['horas_apuradas']}"
         ),
         size=9,
     )
-    page["y"] -= 20
+    page["y"] -= summary_height + 10
+
+
+def _draw_empty_box(page, message):
+    box_width = PDF_PAGE_WIDTH - PDF_MARGIN_LEFT - PDF_MARGIN_RIGHT
+    box_height = 34
+    y_bottom = page["y"] - box_height + 8
+    _draw_rect(
+        page,
+        PDF_MARGIN_LEFT,
+        y_bottom,
+        box_width,
+        box_height,
+        fill_gray=PDF_COLOR_LIGHT,
+        stroke_gray=PDF_COLOR_BLACK,
+        stroke_width=PDF_LINE_NORMAL,
+    )
+    _draw_text(page, PDF_MARGIN_LEFT + 10, page["y"] - 12, message, size=10)
+    page["y"] -= box_height + 4
 
 
 def _draw_table_header(page):
     total_width = sum(width for _, width in PDF_TABLE_COLUMNS)
-    y_bottom = page["y"] - PDF_TABLE_HEADER_HEIGHT + 4
+    y_bottom = page["y"] - PDF_TABLE_HEADER_HEIGHT + 5
     _draw_rect(
         page,
         PDF_MARGIN_LEFT,
         y_bottom,
         total_width,
         PDF_TABLE_HEADER_HEIGHT,
-        fill_gray=0.92,
-        stroke_gray=0.78,
+        fill_gray=PDF_COLOR_HEADER_FILL,
+        stroke_gray=PDF_COLOR_BLACK,
+        stroke_width=PDF_LINE_STRONG,
     )
 
-    current_x = PDF_MARGIN_LEFT + 5
+    current_x = PDF_MARGIN_LEFT
 
     for label, width in PDF_TABLE_COLUMNS:
-        _draw_text(page, current_x, page["y"] - 10, label, font="F2", size=8)
+        _draw_vertical_line(
+            page,
+            current_x,
+            y_bottom,
+            y_bottom + PDF_TABLE_HEADER_HEIGHT,
+            gray=PDF_COLOR_BLACK,
+            width=PDF_LINE_NORMAL,
+        )
+        _draw_text(
+            page,
+            current_x + 4,
+            page["y"] - 12,
+            _truncate_pdf_text(label, width),
+            font="F2",
+            size=8,
+        )
         current_x += width
+
+    _draw_vertical_line(
+        page,
+        PDF_MARGIN_LEFT + total_width,
+        y_bottom,
+        y_bottom + PDF_TABLE_HEADER_HEIGHT,
+        gray=PDF_COLOR_BLACK,
+        width=PDF_LINE_NORMAL,
+    )
 
     page["y"] -= PDF_TABLE_HEADER_HEIGHT + 6
 
 
-def _draw_table_row(page, row):
+def _draw_table_row(page, row, is_alt_row=False):
     total_width = sum(width for _, width in PDF_TABLE_COLUMNS)
-    y_bottom = page["y"] - PDF_TABLE_ROW_HEIGHT + 4
+    y_bottom = page["y"] - PDF_TABLE_ROW_HEIGHT + 5
+    fill_gray = PDF_COLOR_ALT_ROW_FILL if is_alt_row else None
+
     _draw_rect(
         page,
         PDF_MARGIN_LEFT,
         y_bottom,
         total_width,
         PDF_TABLE_ROW_HEIGHT,
-        fill_gray=None,
-        stroke_gray=0.88,
+        fill_gray=fill_gray,
+        stroke_gray=PDF_COLOR_BLACK,
+        stroke_width=PDF_LINE_NORMAL,
     )
 
     row_values = (
@@ -478,17 +578,34 @@ def _draw_table_row(page, row):
         row["observacao"],
     )
 
-    current_x = PDF_MARGIN_LEFT + 5
+    current_x = PDF_MARGIN_LEFT
 
     for value, (_, width) in zip(row_values, PDF_TABLE_COLUMNS):
-        _draw_text(
+        _draw_vertical_line(
             page,
             current_x,
-            page["y"] - 10,
+            y_bottom,
+            y_bottom + PDF_TABLE_ROW_HEIGHT,
+            gray=PDF_COLOR_BLACK,
+            width=PDF_LINE_THIN,
+        )
+        _draw_text(
+            page,
+            current_x + 4,
+            page["y"] - 13,
             _truncate_pdf_text(value, width),
-            size=8,
+            size=8.5,
         )
         current_x += width
+
+    _draw_vertical_line(
+        page,
+        PDF_MARGIN_LEFT + total_width,
+        y_bottom,
+        y_bottom + PDF_TABLE_ROW_HEIGHT,
+        gray=PDF_COLOR_BLACK,
+        width=PDF_LINE_THIN,
+    )
 
     page["y"] -= PDF_TABLE_ROW_HEIGHT
 
@@ -504,40 +621,67 @@ def _draw_footer(page, page_number, total_pages, emission_datetime):
         PDF_FOOTER_Y + 12,
         PDF_PAGE_WIDTH - PDF_MARGIN_RIGHT,
         PDF_FOOTER_Y + 12,
+        gray=PDF_COLOR_BLACK,
+        width=PDF_LINE_NORMAL,
     )
-    _draw_text(page, PDF_MARGIN_LEFT, PDF_FOOTER_Y, footer_text, size=8)
+    _draw_text(
+        page,
+        PDF_MARGIN_LEFT,
+        PDF_FOOTER_Y,
+        footer_text,
+        size=8,
+    )
 
 
 def _sanitize_pdf_text(value):
-    sanitized = str(value).replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
+    sanitized = (
+        str(value).replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
+    )
     sanitized = sanitized.replace("\r", " ").replace("\n", " ")
     return sanitized
 
 
 def _draw_text(page, x, y, text, font="F1", size=9):
     safe_text = _sanitize_pdf_text(text)
-    page["commands"].append(f"BT /{font} {size} Tf 1 0 0 1 {x} {y} Tm ({safe_text}) Tj ET")
+    page["commands"].append(
+        f"BT 0 g /{font} {size} Tf 1 0 0 1 {x} {y} Tm ({safe_text}) Tj ET"
+    )
 
 
-def _draw_line(page, x1, y1, x2, y2):
-    page["commands"].append(f"0.75 G 0.6 w {x1} {y1} m {x2} {y2} l S 0 G")
+def _draw_line(page, x1, y1, x2, y2, gray=PDF_COLOR_DARK, width=PDF_LINE_NORMAL):
+    page["commands"].append(f"{gray} G {width} w {x1} {y1} m {x2} {y2} l S")
 
 
-def _draw_rect(page, x, y, width, height, fill_gray=None, stroke_gray=0.8):
+def _draw_vertical_line(page, x, y1, y2, gray=PDF_COLOR_BLACK, width=PDF_LINE_THIN):
+    _draw_line(page, x, y1, x, y2, gray=gray, width=width)
+
+
+def _draw_rect(
+    page,
+    x,
+    y,
+    width,
+    height,
+    fill_gray=None,
+    stroke_gray=PDF_COLOR_DARK,
+    stroke_width=PDF_LINE_NORMAL,
+):
     commands = []
 
     if fill_gray is not None:
         commands.append(f"{fill_gray} g {x} {y} {width} {height} re f")
 
     if stroke_gray is not None:
-        commands.append(f"{stroke_gray} G 0.6 w {x} {y} {width} {height} re S 0 G")
+        commands.append(
+            f"{stroke_gray} G {stroke_width} w {x} {y} {width} {height} re S"
+        )
 
     page["commands"].extend(commands)
 
 
 def _truncate_pdf_text(value, width):
     text = _format_cell(value)
-    max_chars = max(8, int((width - 10) / 4.6))
+    max_chars = max(8, int((width - 8) / 4.45))
 
     if len(text) <= max_chars:
         return text
@@ -560,7 +704,10 @@ def _render_paginated_pdf(pages):
         kids_refs.append(f"{page_object_id} 0 R")
 
     objects.append(
-        f"2 0 obj << /Type /Pages /Kids [{' '.join(kids_refs)}] /Count {len(pages)} >> endobj\n".encode("latin-1")
+        (
+            f"2 0 obj << /Type /Pages /Kids [{' '.join(kids_refs)}] "
+            f"/Count {len(pages)} >> endobj\n"
+        ).encode("latin-1")
     )
 
     for index, page in enumerate(pages):
@@ -577,18 +724,29 @@ def _render_paginated_pdf(pages):
 
     for index, page in enumerate(pages):
         content_object_id = content_object_start + index
-        content_stream = "\n".join(page["commands"]).encode("latin-1", errors="replace")
+        content_stream = "\n".join(page["commands"]).encode(
+            "latin-1",
+            errors="replace",
+        )
         objects.append(
-            f"{content_object_id} 0 obj << /Length {len(content_stream)} >> stream\n".encode("latin-1")
+            f"{content_object_id} 0 obj << /Length {len(content_stream)} >> stream\n".encode(
+                "latin-1"
+            )
             + content_stream
             + b"\nendstream endobj\n"
         )
 
     objects.append(
-        f"{font_regular_id} 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj\n".encode("latin-1")
+        (
+            f"{font_regular_id} 0 obj << /Type /Font /Subtype /Type1 "
+            f"/BaseFont /Helvetica >> endobj\n"
+        ).encode("latin-1")
     )
     objects.append(
-        f"{font_bold_id} 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >> endobj\n".encode("latin-1")
+        (
+            f"{font_bold_id} 0 obj << /Type /Font /Subtype /Type1 "
+            f"/BaseFont /Helvetica-Bold >> endobj\n"
+        ).encode("latin-1")
     )
 
     pdf = bytearray(b"%PDF-1.4\n")

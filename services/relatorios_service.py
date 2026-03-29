@@ -23,7 +23,7 @@ def _apply_filters(registros, filters):
         filtered_registros = [
             registro
             for registro in filtered_registros
-            if registro.get("funcionario", "").strip().lower() == funcionario
+            if _matches_funcionario(registro, funcionario)
         ]
 
     if data_inicial:
@@ -63,10 +63,26 @@ def _count_by_funcionario(registros):
     totals = {}
 
     for registro in registros:
-        funcionario = registro.get("funcionario", "Nao informado")
+        funcionario = (
+            registro.get("nome_funcionario")
+            or registro.get("funcionario")
+            or registro.get("matricula")
+            or "Nao informado"
+        )
         totals[funcionario] = totals.get(funcionario, 0) + 1
 
     return dict(sorted(totals.items(), key=lambda item: item[0].lower()))
+
+
+def _matches_funcionario(registro, funcionario):
+    valores = {
+        (registro.get("funcionario") or "").strip().lower(),
+        (registro.get("nome_funcionario") or "").strip().lower(),
+        (registro.get("matricula") or "").strip().lower(),
+        (registro.get("funcionario_id") or "").strip().lower(),
+    }
+
+    return funcionario in valores
 
 
 def _sort_key(registro):
